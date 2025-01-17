@@ -76,7 +76,10 @@ class TrafficLight:
         self.position = position
         self.state = 0
         self.timer = 0
-        
+    
+    def define_light(self, state):
+        self.state = state
+
     def draw(self):
         color = RED if not self.state else GREEN
         pygame.draw.circle(screen, color, self.position, TRAFFIC_LIGHT_SIZE)
@@ -102,16 +105,16 @@ class Intersection:
         }
         
 
-    def define_queues(self, directions, list_vehicle):
-        for direction in self.vehicle_queues:
-            queue_length = random.randint(3, 6)  # Nombre aléatoire de véhicules par file
-            for i in range(queue_length):
-                vehicle_type = random.choice(self.vehicle_types)
-                vehicle = Vehicle(direction, i, vehicle_type)
-                self.vehicle_queues[direction].append(vehicle)
-        if direction == "north":
+    def define_queues(self, data):
+        for (direction,list_vehicle) in data.items():
+                for index, vehicle in enumerate(list_vehicle):
+                    vehicle_type = vehicle["type"]
+                    vehicle = Vehicle(direction, index, vehicle_type)
+                    self.vehicle_queues[direction].append(vehicle)
 
-
+    def define_trafic_lights(self, data):
+        for (direction, state) in data.items():
+            self.traffic_lights[direction].define_light(state)
 
     def draw(self):
         # Dessiner le fond
@@ -136,6 +139,39 @@ def main():
     intersection = Intersection()
     running = True
     clock = pygame.time.Clock()
+
+    data_from_sock = {
+        "north": [
+            {"type":"camion"},
+            {"type":"car"},
+            {"type":"car"},
+        ],
+        "south": [
+            {"type":"car"},
+            {"type":"car"},
+            {"type":"moto"},
+        ],
+        "east": [
+            {"type":"car"},
+            {"type":"moto"},
+            {"type":"car"},
+        ],
+        "west": [
+            {"type":"car"},
+            {"type":"car"},
+            {"type":"car"},
+        ]
+    }
+    data_lights = {
+        "north":0,
+        "south":1,
+        "east":0,
+        "west":1
+    }
+
+    # pour update les listes de vehicules
+    intersection.define_queues(data_from_sock)
+    intersection.define_trafic_lights(data_lights)
 
     while running:
         for event in pygame.event.get():
