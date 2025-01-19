@@ -20,7 +20,6 @@ def initProcess(queues):
     for p in process:
         p.join()
 
-
 if __name__ == "__main__":
     queues = createQueues()
     initProcess(queues)

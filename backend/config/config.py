@@ -31,9 +31,11 @@ TRAFIC_GENERATION_PARAMS = {
         "timeBetweenCar":8,
     },
 }
+VEHICLES = ["car", "truk", "scooter"]
 
 VEHICLES_PARAMS = {
     "car":[],
     "truk":[],
     "scooter":[],
+    "highPriority":[],
 }
