@@ -1,22 +1,8 @@
-from process.traffic_gen import TraficGeneration
-from process.coordinator import Coordinator
-
-QUEUE_NAMES = [
-    "northQueue",
-    "southQueue",
-    "eastQueue",
-    "westQueue"
-]
-
 DIRECTION = [
     "north",
     "south",
     "east",
     "west"
-]
-
-PROCESS_FCT = [
-    TraficGeneration
 ]
 
 TRAFIC_GENERATION_PARAMS = {

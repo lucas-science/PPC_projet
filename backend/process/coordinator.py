@@ -1,16 +1,17 @@
-from config.config import QUEUE_NAMES
+from config.config import DIRECTION
 
 def Coordinator(queues):
     total = {
-        "northQueue":[],
-        "southQueue":[],
-        "eastQueue":[],
-        "westQueue":[],
+        "north":[],
+        "south":[],
+        "east":[],
+        "west":[],
     }
     while True:
-        for i, queue in enumerate(queues):
-            new_car = queue.get()
-            total[QUEUE_NAMES[i]].append(new_car)
-            print(QUEUE_NAMES[i], ' : ', total[QUEUE_NAMES[i]])
-            
-        
+        has_messages = False
+        for dir, q in queues.items():
+            if not q.empty():
+                has_messages = True
+                total[dir].append(q.get())
+        if has_messages:
+            print(total)

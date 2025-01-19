@@ -1,11 +1,12 @@
 import multiprocessing as mp
 
-from config.config import QUEUE_NAMES, PROCESS_FCT
+from config.config import DIRECTION
+from config.process import PROCESS_FCT
 
 
 def createQueues() -> dict:
     queues = dict()
-    for name in QUEUE_NAMES:
+    for name in DIRECTION:
         queues[name] = mp.Queue()
     return queues    
 
