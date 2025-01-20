@@ -1,7 +1,11 @@
 from time import sleep, time
 from config.config import GREEN_DURATION
+from process.lib.socket import SocketCommunication
 
-def lights(queues,events):
+sock = SocketCommunication()
+sock.run()
+
+def lights(queue,events):
     last_switch_time = time()
     sens = "north_south"
     while True:
@@ -27,6 +31,13 @@ def lights(queues,events):
                     events["north"].set()
                     events["south"].set()
                     sens = "north_south"
+
+                sock.send_lights_to_server({
+                    "north":events["north"].is_set(),
+                    "south":events["south"].is_set(),
+                    "east":events["east"].is_set(),
+                    "west":events["west"].is_set()
+                })
                     
                 last_switch_time = current_time
             

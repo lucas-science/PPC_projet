@@ -2,26 +2,24 @@ import pygame
 import random
 import os
 
-# Initialisation de Pygame
 pygame.init()
 
-# Constantes
 WINDOW_SIZE = 800
 ROAD_WIDTH = 100
 VEHICLE_WIDTH = 40
 VEHICLE_HEIGHT = 80
 TRAFFIC_LIGHT_SIZE = 20
-VEHICLE_SPACING = 90  # Espace entre les véhicules
-QUEUE_OFFSET = 300    # Distance depuis l'intersection où commence la file
+VEHICLE_SPACING = 90  
+QUEUE_OFFSET = 300    
 
-# Couleurs
+
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 GRAY = (128, 128, 128)
 
-# Création de la fenêtre
+
 screen = pygame.display.set_mode((WINDOW_SIZE, WINDOW_SIZE))
 pygame.display.set_caption("Simulation d'intersection avec files d'attente")
 
@@ -31,7 +29,6 @@ class Vehicle:
         self.queue_position = queue_position
         self.vehicle_type = vehicle_type
         
-        # Charger l'image du véhicule
         image_path = f"/home/lucaslhm/Documents/ecole/3A/projets/PPC/Projet/frontend/img/{vehicle_type}.png"
         try:
             self.original_image = pygame.image.load(image_path)
@@ -42,7 +39,6 @@ class Vehicle:
             self.image = pygame.Surface((VEHICLE_WIDTH, VEHICLE_HEIGHT))
             self.image.fill((random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
 
-        # Rotation de l'image selon la direction
         if direction == "north":
             self.image = pygame.transform.rotate(self.image, -90)
         elif direction == "south":
@@ -51,7 +47,7 @@ class Vehicle:
             self.image = pygame.transform.rotate(self.image, 180)
 
     def get_position(self):
-        # Calculer la position en fonction de la direction et de la position dans la file
+
         if self.direction == "east":
             x = WINDOW_SIZE//2 + ROAD_WIDTH + (self.queue_position * VEHICLE_SPACING)
             y = (WINDOW_SIZE // 2) - ROAD_WIDTH // 2 - VEHICLE_WIDTH // 2
@@ -93,10 +89,8 @@ class Intersection:
             "west": TrafficLight("west", (WINDOW_SIZE//2 - ROAD_WIDTH//2 - 20, WINDOW_SIZE//2 + ROAD_WIDTH//2 ))
         }
         
-        # Types de véhicules disponibles
         self.vehicle_types = ["car", "truk","scooter"]
         
-        # Initialisation des files de véhicules
         self.vehicle_queues = {
             "north": [],
             "south": [],
@@ -121,10 +115,8 @@ class Intersection:
             self.traffic_lights[direction].define_light(state)
 
     def draw(self):
-        # Dessiner le fond
         screen.fill(BLACK)
         
-        # Dessiner les routes
         pygame.draw.rect(screen, GRAY, (0, WINDOW_SIZE//2 - ROAD_WIDTH//2, WINDOW_SIZE, ROAD_WIDTH))
         pygame.draw.rect(screen, GRAY, (WINDOW_SIZE//2 - ROAD_WIDTH//2, 0, ROAD_WIDTH, WINDOW_SIZE))
         
@@ -149,50 +141,19 @@ def main(update_function=None):
             if event.type == pygame.QUIT:
                 running = False
 
-        # Vérifier les mises à jour des données
         if update_function:
             new_data = update_function()
             if new_data:
-                # Mettre à jour les véhicules et les feux
-                print(new_data)
-                intersection.define_queues(new_data["vehicles"])
-                intersection.define_trafic_lights(new_data["lights"])
+                print("Mise à jour des données :", new_data)
+                if new_data["vehicles"] != None:
+                    intersection.define_queues(new_data["vehicles"]) 
+                else:
+                    intersection.define_trafic_lights(new_data["lights"]) 
+
         intersection.draw()
-        pygame.display.flip()
-        clock.tick(60)
+
+        pygame.display.flip()  
+        clock.tick(60)  
 
     pygame.quit()
 
-
-"""
-    data_from_sock = {
-        "north": [
-            {"type":"camion"},
-            {"type":"car"},
-            {"type":"car"},
-        ],
-        "south": [
-            {"type":"car"},
-            {"type":"car"},
-            {"type":"moto"},
-        ],
-        "east": [
-            {"type":"car"},
-            {"type":"moto"},
-            {"type":"car"},
-        ],
-        "west": [
-            {"type":"car"},
-            {"type":"car"},
-            {"type":"car"},
-        ]
-    }
-    data_lights = {
-        "north":0,
-        "south":1,
-        "east":0,
-        "west":1
-    }
-
-
-"""
