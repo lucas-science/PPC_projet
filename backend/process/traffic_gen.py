@@ -38,6 +38,7 @@ def trafic(queue, direction):
         randomVehcile = VEHICLES[randint(0,2)]
         newVehicle = getNewVehicle(randomVehcile, direction)
         queue.put(newVehicle)
+        #print(f"Vehicule créée ! c'est un {newVehicle["type"]}")
 
 def high_priority_traffic(queues,events): 
     while True:
@@ -55,7 +56,7 @@ def TraficGeneration(queues,events):
         threads.append(thread)
         thread.start()
 
-    threads.append(Thread(target=high_priority_traffic, args=[queues, events]))
+    #threads.append(Thread(target=high_priority_traffic, args=[queues, events]))
     
     for thread in threads:
         thread.join()

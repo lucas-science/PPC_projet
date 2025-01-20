@@ -103,9 +103,13 @@ class Intersection:
             "east": [],
             "west": []
         }
-        
+
+    def clear_queues(self):
+        for direction in self.vehicle_queues:
+            self.vehicle_queues[direction].clear()
 
     def define_queues(self, data):
+        self.clear_queues()
         for (direction,list_vehicle) in data.items():
                 for index, vehicle in enumerate(list_vehicle):
                     vehicle_type = vehicle["type"]
@@ -150,9 +154,9 @@ def main(update_function=None):
             new_data = update_function()
             if new_data:
                 # Mettre à jour les véhicules et les feux
+                print(new_data)
                 intersection.define_queues(new_data["vehicles"])
                 intersection.define_trafic_lights(new_data["lights"])
-
         intersection.draw()
         pygame.display.flip()
         clock.tick(60)

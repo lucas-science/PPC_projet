@@ -4,6 +4,9 @@ DIRECTION = [
     "east",
     "west"
 ]
+CIRCLE_DIRECTION = [
+    "north", "east", "south", "west"
+]
 
 TRAFIC_GENERATION_PARAMS = {
     "north": {

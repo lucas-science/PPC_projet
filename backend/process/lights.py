@@ -13,6 +13,7 @@ def lights(queues,events):
                 break
                 
             if elapsed_time >= GREEN_DURATION and not events["presenceHighPriorityVehicle"].is_set():
+                print("[LIGHTS] On change de couleur")
                 if sens == "north_south":
                     events["north"].clear()
                     events["south"].clear()
