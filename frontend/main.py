@@ -32,7 +32,7 @@ class TrafficServer:
                 traffic_data = json.loads(data)
                 
                 # Préparer les données pour l'interface
-                formatted_data = self.format_data(traffic_data)
+                formatted_data = self.format_data(traffic_data["traffic"], traffic_data["lights"])
                 
                 # Envoyer les données à l'interface via la queue
                 self.queue.put(formatted_data)
@@ -49,14 +49,7 @@ class TrafficServer:
         client_socket.close()
         server.close()
 
-    def format_data(self, traffic_data):
-        traffic_lights = {
-            "north":0,
-            "south":0,
-            "east":0,
-            "west":0
-        }
-        
+    def format_data(self, traffic_data, traffic_lights):
         return {
             "vehicles": traffic_data,
             "lights": traffic_lights

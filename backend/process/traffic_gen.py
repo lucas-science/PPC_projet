@@ -7,7 +7,6 @@ from config.config import TRAFIC_GENERATION_PARAMS, VEHICLES_PARAMS, DIRECTION, 
 
 def getNewVehicle(type, direction):
     if type in VEHICLES_PARAMS:
-
         dest = direction
         while dest == direction:
             dest_index = randint(0,3)
@@ -40,7 +39,7 @@ def trafic(queue, direction):
         newVehicle = getNewVehicle(randomVehcile, direction)
         queue.put(newVehicle)
 
-def high_priority_traffic(queues): 
+def high_priority_traffic(queues,events): 
     while True:
         sleep(randint(5,15))
         random_index = randint(0,3)
@@ -49,14 +48,14 @@ def high_priority_traffic(queues):
         queues[random_direction].put(newVehicle)
         
 
-def TraficGeneration(queues):
+def TraficGeneration(queues,events):
     threads = []
     for (dir,q) in queues.items():
         thread = Thread(target=trafic, args=[q,dir])
         threads.append(thread)
         thread.start()
 
-    threads.append(Thread(target=high_priority_traffic, args=[queues]))
+    threads.append(Thread(target=high_priority_traffic, args=[queues, events]))
     
     for thread in threads:
         thread.join()

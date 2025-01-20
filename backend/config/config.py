@@ -10,25 +10,25 @@ TRAFIC_GENERATION_PARAMS = {
         "randomUniform":0,
         "randomUniformRange":[4,8],
         "defined":1,
-        "timeBetweenCar":5,
+        "timeBetweenCar":10,
     },
     "south": {
         "randomUniform":0,
         "randomUniformRange":[4,8],
         "defined":1,
-        "timeBetweenCar":3,
+        "timeBetweenCar":7,
     },
     "east": {
         "randomUniform":0,
         "randomUniformRange":[4,8],
         "defined":1,
-        "timeBetweenCar":2,
+        "timeBetweenCar":5,
     },
     "west": {
         "randomUniform":0,
         "randomUniformRange":[4,8],
         "defined":1,
-        "timeBetweenCar":8,
+        "timeBetweenCar":16,
     },
 }
 VEHICLES = ["car", "truk", "scooter"]
@@ -39,3 +39,5 @@ VEHICLES_PARAMS = {
     "scooter":[],
     "highPriority":[],
 }
+
+GREEN_DURATION = 10
