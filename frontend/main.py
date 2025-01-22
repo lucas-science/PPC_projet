@@ -1,8 +1,6 @@
 import socket
 import json
 import multiprocessing as mp
-import pygame
-import sys
 from datetime import datetime
 
 
