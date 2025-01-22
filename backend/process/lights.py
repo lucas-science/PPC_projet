@@ -1,15 +1,17 @@
 from time import sleep, time
-from config.config import GREEN_DURATION
+from config.config import GREEN_DURATION, DIRECTION
 from process.lib.socket import SocketCommunication
 
 sock = SocketCommunication()
 
-def lights(queue, events):
+def lights(queues, events):
+    HighPrirorityVehicleDirection = None
     sock.run()
     last_switch_time = time()
     sens = "north_south"
     while True:
         while not events["presenceHighPriorityVehicle"].is_set():
+            HighPrirorityVehicleDirection = None
             current_time = time()
             elapsed_time = current_time - last_switch_time
 
@@ -40,6 +42,22 @@ def lights(queue, events):
                 })
 
                 last_switch_time = current_time
+            sleep(0.1)
+        #print("la police est là ")
+        # si y a un vehicule de high priroity alors on init les feu si ce n'est pas déja fait
+        if HighPrirorityVehicleDirection == None:
+            HighPrirorityVehicleDirection = queues["locationHighPrirorityVehicle"].get()
+            print("emergency in : ",HighPrirorityVehicleDirection)
+            for dir in DIRECTION:
+                if dir != HighPrirorityVehicleDirection:
+                    events[dir].clear()
+            if not events[HighPrirorityVehicleDirection].is_set():
+                events[HighPrirorityVehicleDirection].set()
 
-            sleep(0.1)  # éviter de surcharger le CPU
+            sock.send_lights_to_server({
+                "north": events["north"].is_set(),
+                "south": events["south"].is_set(),
+                "east": events["east"].is_set(),
+                "west": events["west"].is_set()
+            })
         sleep(0.1)

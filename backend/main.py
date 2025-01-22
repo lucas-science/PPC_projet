@@ -1,9 +1,6 @@
 import multiprocessing as mp
 from time import sleep
-import json
-import socket
 import signal
-import os
 
 
 from config.config import DIRECTION
@@ -13,10 +10,13 @@ process = list()
 
 def createQueues() -> dict:
     return {
-        "north":mp.Queue(),
-        "south":mp.Queue(),
-        "east":mp.Queue(),
-        "west":mp.Queue(),
+        "traffic":{
+            "north":mp.Queue(),
+            "south":mp.Queue(),
+            "east":mp.Queue(),
+            "west":mp.Queue(),
+        },
+        "locationHighPrirorityVehicle": mp.Queue(),
     }
 
 def createEvents()-> dict:

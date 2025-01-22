@@ -36,8 +36,16 @@ previous_lights_etat = {
 data_updated = Event()
 data_sent = Event()
 
-TIME_TO_LIVE = 2
+TIME_TO_LEAVE = 2
 
+
+def deleteCarFromTraffic(traffic, direction,sock, events):
+    voiture = traffic[direction].pop(0)
+    print(f"{direction} : la {voiture["type"]} part vers {voiture["destination"]}")
+    sleep(TIME_TO_LEAVE)
+    sock.send_traffic_to_server(traffic.copy())
+    if voiture["type"] == "police":
+        events["presenceHighPriorityVehicle"].clear()
 
 def manageTrafficForDirection(direction, events, sock):
     index_dir = CIRCLE_DIRECTION.index(direction)
@@ -45,42 +53,33 @@ def manageTrafficForDirection(direction, events, sock):
     a_droite = CIRCLE_DIRECTION[(index_dir+3) % 4]
     try:
         while True:
-            if events[direction].is_set() and events[direction].is_set(): # cas normal
-                if not total_traffic[direction]:
+            if not total_traffic[direction]:
                     sleep(0.1)
                     continue
+            elif events[direction].is_set() and events[en_face].is_set():
 
-                firstCar = total_traffic[direction][0]["destination"]
+
+                firstCarDestination = total_traffic[direction][0]["destination"]
                 nbr_voiture_en_face = len(total_traffic[en_face])
 
-                if firstCar == a_droite:
-                    voiture = total_traffic[direction].pop(0)
-                    print(f"{direction} : la {voiture["type"]} part vers {firstCar}")
-                    sleep(TIME_TO_LIVE)
-                    sock.send_traffic_to_server(total_traffic.copy())
-                elif firstCar == en_face:
-                    voiture = total_traffic[direction].pop(0)
-                    print(f"{direction} : la {voiture["type"]} part vers {firstCar}")
-                    sleep(TIME_TO_LIVE)
-                    sock.send_traffic_to_server(total_traffic.copy())
+                if firstCarDestination == a_droite:
+                    deleteCarFromTraffic(total_traffic, direction, sock, events)
+
+                elif firstCarDestination == en_face:
+                    deleteCarFromTraffic(total_traffic, direction, sock, events)
+                
                 else:
                     gauche_event[direction].set()
                     if not nbr_voiture_en_face:
-                        voiture = total_traffic[direction].pop(0)
-                        gauche_event[direction].clear()
-                        print(f"{direction} : la {voiture["type"]} part vers {firstCar}")
-                        sleep(TIME_TO_LIVE)
-                        sock.send_traffic_to_server(total_traffic.copy())
+                        deleteCarFromTraffic(total_traffic, direction, sock, events)
                     if gauche_event[en_face].is_set():
                         if nbr_voiture_en_face < len(total_traffic[direction]):
-                            voiture = total_traffic[direction].pop(0)
-                            gauche_event[direction].clear()
-                            print(f"{direction} : la {voiture["type"]} part vers {firstCar}")
-                            sleep(TIME_TO_LIVE)
-                            sock.send_traffic_to_server(total_traffic.copy())
-                            
+                            deleteCarFromTraffic(total_traffic, direction, sock, events)
             elif events[direction].is_set():
-                print("CAS du véhicule prioritaire")
+                print("ciruclation en mode police")
+                deleteCarFromTraffic(total_traffic, direction, sock, events)
+                
+
     except KeyboardInterrupt:
         pass
 
@@ -88,7 +87,7 @@ def getQueuesUpdates(queues, events, sock):
     change = False
     try: 
         while True:
-            for dir, q in queues.items():
+            for dir, q in queues["traffic"].items():
                 if not q.empty():
                         total_traffic[dir].append(q.get())
                         change = True

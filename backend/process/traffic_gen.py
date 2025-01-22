@@ -46,21 +46,22 @@ def trafic(queue, direction):
 def high_priority_traffic(queues,events): 
     try:
         while True:
-            sleep(randint(5,15))
-            random_index = randint(0,3)
-            random_direction = DIRECTION[random_index]
-            newVehicle = getNewVehicle("police", random_direction)
-            print("POLICEEEEE")
-            queues[random_direction].put(newVehicle)
-            #events[random_direction].set()
-            #events["presenceHighPriorityVehicle"].set()
+            if not events["presenceHighPriorityVehicle"].is_set():
+                sleep(randint(5,15))
+                random_index = randint(0,3)
+                random_direction = DIRECTION[random_index]
+                newVehicle = getNewVehicle("police", random_direction)
+                print("POLICEEEEE")
+                queues["traffic"][random_direction].put(newVehicle)
+                events["presenceHighPriorityVehicle"].set()
+                queues["locationHighPrirorityVehicle"].put(random_direction)
     except KeyboardInterrupt:
         pass
          
 
 def TraficGeneration(queues,events):
     threads = []
-    for (dir,q) in queues.items():
+    for (dir,q) in queues["traffic"].items():
         thread = Thread(target=trafic, args=[q,dir])
         threads.append(thread)
     threads.append(Thread(target=high_priority_traffic, args=[queues, events]))
