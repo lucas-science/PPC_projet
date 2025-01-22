@@ -5,7 +5,7 @@ import pygame
 import sys
 from datetime import datetime
 
-# Code du serveur socket
+
 class TrafficServer:
     def __init__(self, host='localhost', port=5001, queue=None):
         self.host = host
@@ -24,11 +24,11 @@ class TrafficServer:
 
                 traffic_data = json.loads(data)
 
-                # Envoyer les données à l'interface via la queue
                 self.queue.put(traffic_data)
 
                 timestamp = datetime.now().strftime("%H:%M:%S")
-                print(f"\n[{timestamp}] Données reçues et transmises à l'interface")
+                print(
+                    f"\n[{timestamp}] Données reçues et transmises à l'interface")
 
             except json.JSONDecodeError as e:
                 print(f"Erreur JSON: {e}")
@@ -37,6 +37,7 @@ class TrafficServer:
                 break
 
         client_socket.close()
+
 
 def run_server(queue):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -48,35 +49,32 @@ def run_server(queue):
     while True:
         client_socket, address = server.accept()
 
-        # Pour chaque connexion, créer un nouveau processus pour gérer la communication
-        client_process = mp.Process(target=TrafficServer(queue=queue).start, args=(client_socket, address))
+        client_process = mp.Process(target=TrafficServer(
+            queue=queue).start, args=(client_socket, address))
         client_process.start()
 
+
 def run_interface(queue):
-    # Importer le code de l'interface ici pour éviter les conflits d'importation
-    from interface import main as run_interface_main  # Remplacer 'your_interface_file' par le nom de votre fichier
-    
+    # Remplacer 'your_interface_file' par le nom de votre fichier
+    from interface import main as run_interface_main
+
     def update_data_from_queue():
         if not data_queue.empty():
-            return data_queue.get()  # Récupérer les nouvelles données de la queue
-        return None  # Si aucune nouvelle donnée
+            return data_queue.get()
+        return None
 
-
-    # Lancer l'interface avec la fonction de mise à jour
     run_interface_main(update_data_from_queue)
 
+
 if __name__ == "__main__":
-    # Créer une queue pour la communication entre les processus
     data_queue = mp.Queue()
 
-    # Créer et démarrer les processus
     server_process = mp.Process(target=run_server, args=(data_queue,))
     interface_process = mp.Process(target=run_interface, args=(data_queue,))
 
     server_process.start()
     interface_process.start()
 
-    # Attendre la fin des processus
     try:
         server_process.join()
         interface_process.join()

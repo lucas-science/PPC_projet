@@ -8,24 +8,26 @@ from config.process import PROCESS_FCT
 
 process = list()
 
+
 def createQueues() -> dict:
     return {
-        "traffic":{
-            "north":mp.Queue(),
-            "south":mp.Queue(),
-            "east":mp.Queue(),
-            "west":mp.Queue(),
+        "traffic": {
+            "north": mp.Queue(),
+            "south": mp.Queue(),
+            "east": mp.Queue(),
+            "west": mp.Queue(),
         },
         "locationHighPrirorityVehicle": mp.Queue(),
     }
 
-def createEvents()-> dict:
+
+def createEvents() -> dict:
     return {
-        "north":mp.Event(),
-        "south":mp.Event(),
-        "east":mp.Event(),
-        "west":mp.Event(),
-        "presenceHighPriorityVehicle":mp.Event(),
+        "north": mp.Event(),
+        "south": mp.Event(),
+        "east": mp.Event(),
+        "west": mp.Event(),
+        "presenceHighPriorityVehicle": mp.Event(),
     }
 
 
@@ -37,17 +39,18 @@ def initProcess(queues, events):
         p.start()
     return process
 
+
 def waitEndProcess(process):
     for p in process:
         p.join()
+
 
 def signalHandler(frame, sign):
     for p in process:
         p.terminate()
     print("Tous les processus et threads sont terminés. Programme arrêté.")
     for p in process:
-        p.join()  
-
+        p.join()
 
 
 if __name__ == "__main__":
