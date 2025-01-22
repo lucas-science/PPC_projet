@@ -6,6 +6,12 @@
 pip install pygame os multiprocessing time signal threading random socket json datetime
 ```
 
+ou bien
+
+```sh
+sudo apt-get install python3-pygame
+```
+
 (sachant que la plupart des packages sont déjà installé)
 
 ## Comment on lance le projet ?
