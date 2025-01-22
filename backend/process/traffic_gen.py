@@ -22,7 +22,7 @@ def getNewVehicle(type, direction):
         return -1
 
 def timeGeneration(direction):
-    for (dir,options) in TRAFIC_GENERATION_PARAMS.items():
+    for (dir,options) in TRAFIC_GENERATION_PARAMS["direction"].items():
         if dir == direction:
             if options["randomUniform"]:
                 beginRange,endRange = options["randomUniformRange"]
@@ -43,11 +43,17 @@ def trafic(queue, direction):
     except KeyboardInterrupt:
         pass
 
+def timeGenerationHighPriorityVehicle():
+    if TRAFIC_GENERATION_PARAMS["highPriorityVehicles"]["defined"]:
+        return TRAFIC_GENERATION_PARAMS["highPriorityVehicles"]["timeBetweenCar"]
+    #else: -> si on utilise une génération aléatoire 
+    
 def high_priority_traffic(queues,events): 
     try:
         while True:
             if not events["presenceHighPriorityVehicle"].is_set():
-                sleep(randint(5,15))
+                time_to_sleep = timeGenerationHighPriorityVehicle()
+                sleep(time_to_sleep)
                 random_index = randint(0,3)
                 random_direction = DIRECTION[random_index]
                 newVehicle = getNewVehicle("police", random_direction)

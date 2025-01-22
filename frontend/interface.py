@@ -23,6 +23,34 @@ GRAY = (128, 128, 128)
 screen = pygame.display.set_mode((WINDOW_SIZE, WINDOW_SIZE))
 pygame.display.set_caption("Simulation d'intersection avec files d'attente")
 
+
+class Box:
+    def __init__(self, x, y, width, height, text, font_size=14, box_color=(0, 0, 0, 0), text_color=(255, 255, 255)):
+        self.rect = pygame.Rect(x, y, width, height)  # Définir la boîte avec ses dimensions
+        self.text = text
+        self.font = pygame.font.SysFont("Arial", font_size)  # Utilisation de la police Arial
+        self.box_color = box_color  # Fond transparent
+        self.text_color = text_color
+        self.border_color = (255, 255, 204)  # Jaune pâle pour la bordure
+        self.border_width = 2  # Épaisseur de la bordure
+
+    def change_text(self,text):
+        self.text = text
+
+    def draw(self, screen):
+        # Dessiner le fond transparent avec la bordure
+        pygame.draw.rect(screen, self.border_color, self.rect, self.border_width)
+        
+        # Créer un surface de texte
+        text_surface = self.font.render(self.text, True, self.text_color)
+        
+        # Calculer la position du texte centré dans la boîte
+        text_rect = text_surface.get_rect(center=self.rect.center)
+        
+        # Dessiner le texte
+        screen.blit(text_surface, text_rect)
+
+
 class Vehicle:
     def __init__(self, direction, queue_position, vehicle_type):
         self.direction = direction
@@ -98,6 +126,15 @@ class Intersection:
             "west": []
         }
 
+        largeur_box = 40
+        longueur_box = 200
+        self.boxs_text = {
+            "north": Box(WINDOW_SIZE//2 - 250,WINDOW_SIZE//2-140 , longueur_box,largeur_box, "north"),
+            "south": Box(WINDOW_SIZE//2 + 50, WINDOW_SIZE//2 +100, longueur_box, largeur_box, "south"),
+            "east": Box(WINDOW_SIZE//2 +50, WINDOW_SIZE//2 - 100 , longueur_box,largeur_box, "east"),
+            "west": Box(WINDOW_SIZE//2 - 250, WINDOW_SIZE//2 +60, longueur_box,largeur_box, "west")
+        }
+
     def clear_queues(self):
         for direction in self.vehicle_queues:
             self.vehicle_queues[direction].clear()
@@ -113,6 +150,11 @@ class Intersection:
     def define_trafic_lights(self, data):
         for (direction, state) in data.items():
             self.traffic_lights[direction].define_light(state)
+
+    def define_vehicule_deleted(self, vehicle):
+        if vehicle != None:
+            texte = f"{vehicle["type"]} has gone to {vehicle["destination"]}"
+            self.boxs_text[vehicle["source"]].change_text(texte)
 
     def draw(self):
         screen.fill(BLACK)
@@ -131,6 +173,11 @@ class Intersection:
             for vehicle in self.vehicle_queues[direction]:
                 vehicle.draw()
 
+        for (_,box) in self.boxs_text.items():
+            box.draw(screen)
+        
+
+
 def main(update_function=None):
     intersection = Intersection()
     running = True
@@ -146,7 +193,8 @@ def main(update_function=None):
             if new_data:
                 print("Mise à jour des données :", new_data)
                 if new_data["vehicles"] != None:
-                    intersection.define_queues(new_data["vehicles"]) 
+                    intersection.define_queues(new_data["vehicles"])
+                    intersection.define_vehicule_deleted(new_data["vehicle_deleted"])
                 else:
                     intersection.define_trafic_lights(new_data["lights"]) 
 

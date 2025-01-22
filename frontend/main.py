@@ -7,7 +7,7 @@ from datetime import datetime
 
 # Code du serveur socket
 class TrafficServer:
-    def __init__(self, host='localhost', port=5000, queue=None):
+    def __init__(self, host='localhost', port=5001, queue=None):
         self.host = host
         self.port = port
         self.queue = queue
@@ -24,11 +24,8 @@ class TrafficServer:
 
                 traffic_data = json.loads(data)
 
-                # Préparer les données pour l'interface
-                formatted_data = self.format_data(traffic_data["traffic"], traffic_data["lights"])
-
                 # Envoyer les données à l'interface via la queue
-                self.queue.put(formatted_data)
+                self.queue.put(traffic_data)
 
                 timestamp = datetime.now().strftime("%H:%M:%S")
                 print(f"\n[{timestamp}] Données reçues et transmises à l'interface")
@@ -41,18 +38,12 @@ class TrafficServer:
 
         client_socket.close()
 
-    def format_data(self, traffic_data, traffic_lights):
-        return {
-            "vehicles": traffic_data,
-            "lights": traffic_lights
-        }
-
 def run_server(queue):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(('localhost', 5000))
+    server.bind(('localhost', 5001))
     server.listen()
-    print(f"Serveur démarré sur localhost:5000")
+    print(f"Serveur démarré sur localhost:5001")
 
     while True:
         client_socket, address = server.accept()

@@ -2,7 +2,7 @@ import json, socket
 from time import sleep
 
 class SocketCommunication:
-    def __init__(self, host='localhost', port=5000):
+    def __init__(self, host='localhost', port=5001):
         self.host = host
         self.port = port
         self.sock = None
@@ -18,12 +18,13 @@ class SocketCommunication:
                 print("Serveur non disponible, nouvelle tentative dans 5 secondes...")
                 sleep(5)
 
-    def send_traffic_to_server(self, total_traffic):
+    def send_traffic_to_server(self, total_traffic, voiture_deleted=None):
         if self.sock is not None:  # Vérifie si la socket est toujours ouverte
             try:
                 print("[DEBUG] Sending traffic to the server...")
                 json_data = json.dumps({
-                    "traffic": total_traffic,
+                    "vehicles": total_traffic,
+                    "vehicle_deleted":voiture_deleted,
                     "lights": None
                 }) + "\n"
                 self.sock.sendall(json_data.encode('utf-8'))
@@ -40,7 +41,8 @@ class SocketCommunication:
                 print("[DEBUG] Sending lights to the server...")
                 json_data = json.dumps({
                     "lights": lights,
-                    "traffic": None
+                    "vehicle_deleted":None,
+                    "vehicles": None
                 }) + "\n"
                 self.sock.sendall(json_data.encode('utf-8'))
             except socket.error as e:
