@@ -41,58 +41,64 @@ TIME_TO_LIVE = 2
 
 def manageTrafficForDirection(direction, events, sock):
     index_dir = CIRCLE_DIRECTION.index(direction)
-    while True:
-        if events[direction].is_set():
-            if not total_traffic[direction]:
-                sleep(0.1)
-                continue
+    en_face = CIRCLE_DIRECTION[(index_dir+2) % 4]
+    a_droite = CIRCLE_DIRECTION[(index_dir+3) % 4]
+    try:
+        while True:
+            if events[direction].is_set() and events[direction].is_set(): # cas normal
+                if not total_traffic[direction]:
+                    sleep(0.1)
+                    continue
 
-            # print(f"Thread {direction}: Attente de l'envoi des données.",total_traffic[direction] )
-            # print(f"Thread {direction}: Vérification des conditions pour modification de la circulation.")
-            firstCar = total_traffic[direction][0]["destination"]
-            en_face = CIRCLE_DIRECTION[(index_dir+2) % 4]
-            a_droite = CIRCLE_DIRECTION[(index_dir+3) % 4]
-            nbr_voiture_en_face = len(total_traffic[en_face])
+                firstCar = total_traffic[direction][0]["destination"]
+                nbr_voiture_en_face = len(total_traffic[en_face])
 
-            if firstCar == a_droite:
-                voiture = total_traffic[direction].pop(0)
-                print(f"{direction} : la {voiture["type"]} part vers {firstCar}")
-                sleep(TIME_TO_LIVE)
-                sock.send_traffic_to_server(total_traffic.copy())
-            elif firstCar == en_face:
-                voiture = total_traffic[direction].pop(0)
-                print(f"{direction} : la {voiture["type"]} part vers {firstCar}")
-                sleep(TIME_TO_LIVE)
-                sock.send_traffic_to_server(total_traffic.copy())
-            else:
-                gauche_event[direction].set()
-                if not nbr_voiture_en_face:
+                if firstCar == a_droite:
                     voiture = total_traffic[direction].pop(0)
-                    gauche_event[direction].clear()
                     print(f"{direction} : la {voiture["type"]} part vers {firstCar}")
                     sleep(TIME_TO_LIVE)
                     sock.send_traffic_to_server(total_traffic.copy())
-                if gauche_event[en_face].is_set():
-                    if nbr_voiture_en_face < len(total_traffic[direction]):
+                elif firstCar == en_face:
+                    voiture = total_traffic[direction].pop(0)
+                    print(f"{direction} : la {voiture["type"]} part vers {firstCar}")
+                    sleep(TIME_TO_LIVE)
+                    sock.send_traffic_to_server(total_traffic.copy())
+                else:
+                    gauche_event[direction].set()
+                    if not nbr_voiture_en_face:
                         voiture = total_traffic[direction].pop(0)
                         gauche_event[direction].clear()
                         print(f"{direction} : la {voiture["type"]} part vers {firstCar}")
                         sleep(TIME_TO_LIVE)
                         sock.send_traffic_to_server(total_traffic.copy())
-
+                    if gauche_event[en_face].is_set():
+                        if nbr_voiture_en_face < len(total_traffic[direction]):
+                            voiture = total_traffic[direction].pop(0)
+                            gauche_event[direction].clear()
+                            print(f"{direction} : la {voiture["type"]} part vers {firstCar}")
+                            sleep(TIME_TO_LIVE)
+                            sock.send_traffic_to_server(total_traffic.copy())
+                            
+            elif events[direction].is_set():
+                print("CAS du véhicule prioritaire")
+    except KeyboardInterrupt:
+        pass
 
 def getQueuesUpdates(queues, events, sock):
     change = False
-    while True:
-        for dir, q in queues.items():
-            if not q.empty():
-                    total_traffic[dir].append(q.get())
-                    change = True
+    try: 
+        while True:
+            for dir, q in queues.items():
+                if not q.empty():
+                        total_traffic[dir].append(q.get())
+                        change = True
 
-        if change:
-            sock.send_traffic_to_server(total_traffic)
-        change = False
-        sleep(0.1)
+            if change:
+                sock.send_traffic_to_server(total_traffic)
+            change = False
+            sleep(0.1)
+    except KeyboardInterrupt:
+        print("Get queue thread ended")
 
 def Coordinator(queues, events):
     sock = SocketCommunication()
@@ -108,5 +114,10 @@ def Coordinator(queues, events):
     for thread in threads:
         thread.start()
 
+
     for thread in threads:
         thread.join()
+    
+    sock.close_connection()
+
+    

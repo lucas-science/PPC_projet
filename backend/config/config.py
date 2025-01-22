@@ -40,7 +40,7 @@ VEHICLES_PARAMS = {
     "car":[],
     "truk":[],
     "scooter":[],
-    "highPriority":[],
+    "police":[],
 }
 
 GREEN_DURATION = 10

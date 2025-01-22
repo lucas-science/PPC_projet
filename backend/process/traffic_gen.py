@@ -32,31 +32,42 @@ def timeGeneration(direction):
                 return int(options["timeBetweenCar"])
 
 def trafic(queue, direction):
-    while True:
-        timeToWait = timeGeneration(direction)
-        sleep(timeToWait)
-        randomVehcile = VEHICLES[randint(0,2)]
-        newVehicle = getNewVehicle(randomVehcile, direction)
-        queue.put(newVehicle)
-        #print(f"Vehicule créée ! c'est un {newVehicle["type"]}")
+    try:
+        while True:
+            timeToWait = timeGeneration(direction)
+            sleep(timeToWait)
+            randomVehcile = VEHICLES[randint(0,2)]
+            newVehicle = getNewVehicle(randomVehcile, direction)
+            queue.put(newVehicle)
+            #print(f"Vehicule créée ! c'est un {newVehicle["type"]}")
+    except KeyboardInterrupt:
+        pass
 
 def high_priority_traffic(queues,events): 
-    while True:
-        sleep(randint(5,15))
-        random_index = randint(0,3)
-        random_direction = DIRECTION[random_index]
-        newVehicle = getNewVehicle("highPriority")
-        queues[random_direction].put(newVehicle)
-        
+    try:
+        while True:
+            sleep(randint(5,15))
+            random_index = randint(0,3)
+            random_direction = DIRECTION[random_index]
+            newVehicle = getNewVehicle("police", random_direction)
+            print("POLICEEEEE")
+            queues[random_direction].put(newVehicle)
+            #events[random_direction].set()
+            #events["presenceHighPriorityVehicle"].set()
+    except KeyboardInterrupt:
+        pass
+         
 
 def TraficGeneration(queues,events):
     threads = []
     for (dir,q) in queues.items():
         thread = Thread(target=trafic, args=[q,dir])
         threads.append(thread)
+    threads.append(Thread(target=high_priority_traffic, args=[queues, events]))
+
+    for thread in threads:
         thread.start()
 
-    #threads.append(Thread(target=high_priority_traffic, args=[queues, events]))
-    
     for thread in threads:
         thread.join()
+

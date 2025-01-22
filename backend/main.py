@@ -2,12 +2,14 @@ import multiprocessing as mp
 from time import sleep
 import json
 import socket
+import signal
+import os
 
 
 from config.config import DIRECTION
 from config.process import PROCESS_FCT
 
-
+process = list()
 
 def createQueues() -> dict:
     return {
@@ -39,9 +41,21 @@ def waitEndProcess(process):
     for p in process:
         p.join()
 
+def signalHandler(frame, sign):
+    for p in process:
+        p.terminate()
+    print("Tous les processus et threads sont terminés. Programme arrêté.")
+    for p in process:
+        p.join()  
+
+
+
 if __name__ == "__main__":
     queues = createQueues()
     events = createEvents()
 
     process = initProcess(queues, events)
+
+    signal.signal(signal.SIGINT, signalHandler)
+
     waitEndProcess(process)
