@@ -25,27 +25,22 @@ gauche_event = {
     "west": Event(),
 }
 
-previous_lights_etat = {
-    "north": False,
-    "south": False,
-    "east": False,
-    "west": False,
-}
 
 data_updated = Event()
 data_sent = Event()
 
 
 def deleteCarFromTraffic(traffic, direction, sock, events):
+    voiture = traffic[direction][0]
+    voiture["source"] = direction
+    print(f"{direction} : la {voiture['type']} part vers {voiture['destination']}")
+    sleep(1)
     with traffic_lock:
         voiture = traffic[direction].pop(0)
-    print(f"{direction} : la {voiture['type']
-                              } part vers {voiture['destination']}")
-    sleep(TIME_TO_LEAVE)
-    voiture["source"] = direction
     sock.send_traffic_to_server(traffic.copy(), voiture)
     if voiture["type"] == "police":
         events["presenceHighPriorityVehicle"].clear()
+    sleep(TIME_TO_LEAVE)
 
 
 def manageTrafficForDirection(direction, events, sock):
@@ -76,10 +71,12 @@ def manageTrafficForDirection(direction, events, sock):
                         if not nbr_voiture_en_face:
                             deleteCarFromTraffic(
                                 total_traffic, direction, sock, events)
+                            gauche_event[direction].clear()
                         if gauche_event[en_face].is_set():
                             if nbr_voiture_en_face < len(total_traffic[direction]):
                                 deleteCarFromTraffic(
                                     total_traffic, direction, sock, events)
+                                gauche_event[direction].clear()
 
             elif events[direction].is_set():
                 print("circulation en mode police")

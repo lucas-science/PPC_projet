@@ -46,8 +46,7 @@ def lights(queues, events):
             sleep(0.1)
         # si y a un vehicule de high priroity alors on init les feu si ce n'est pas déja fait
         if HighPrirorityVehicleDirection == None:
-            HighPrirorityVehicleDirection = queues["locationHighPrirorityVehicle"].get(
-            )
+            HighPrirorityVehicleDirection = queues["locationHighPrirorityVehicle"].get()
             print("emergency in : ", HighPrirorityVehicleDirection)
             for dir in DIRECTION:
                 if dir != HighPrirorityVehicleDirection:

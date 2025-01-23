@@ -53,7 +53,6 @@ def run_server(queue):
 
 
 def run_interface(queue):
-    # Remplacer 'your_interface_file' par le nom de votre fichier
     from interface import main as run_interface_main
 
     def update_data_from_queue():
